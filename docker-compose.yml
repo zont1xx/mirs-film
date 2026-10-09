@@ -1,0 +1,21 @@
+# Local infrastructure only. Redis, MinIO, Mailpit, Kafka join in later phases, when a feature needs them.
+services:
+  postgres:
+    image: postgres:18
+    environment:
+      POSTGRES_DB: ${DB_NAME:-mirsfilm}
+      POSTGRES_USER: ${DB_USER:-mirsfilm}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-mirsfilm}
+    ports:
+      - "5432:5432"
+    volumes:
+      # Postgres 18 images keep data under /var/lib/postgresql/<major>/, so mount the parent directory.
+      - pgdata:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+volumes:
+  pgdata:
